@@ -9,9 +9,12 @@ from colbert.utils.utils import flatten, zipstar
 
 class Ranker():
     def __init__(self, args, inference, faiss_depth=1024):
+
         self.inference = inference
         self.faiss_depth = faiss_depth
 
+        print ("CREATING A FAISS INDEX RANKER, faiss_depth: ", self.faiss_depth)
+        
         if faiss_depth is not None:
             self.faiss_index = FaissIndex(args.index_path, args.faiss_index_path, args.nprobe, part_range=args.part_range)
             self.retrieve = partial(self.faiss_index.retrieve, self.faiss_depth)

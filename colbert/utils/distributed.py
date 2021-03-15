@@ -9,6 +9,8 @@ def init(rank):
     nranks = max(1, nranks)
     is_distributed = nranks > 1
 
+    print("N RANK: ", rank, ". num_gpus: ", torch.cuda.device_count(), ". NRANKS: ", nranks,"." )
+
     if rank == 0:
         print('nranks =', nranks, '\t num_gpus =', torch.cuda.device_count())
 

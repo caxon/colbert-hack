@@ -13,6 +13,9 @@ from colbert.evaluation.ranking_logger import RankingLogger
 from colbert.utils.utils import print_message, batch
 from colbert.ranking.rankers import Ranker
 
+import os
+
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 def retrieve(args):
     inference = ModelInference(args.colbert, amp=args.amp)
@@ -20,6 +23,8 @@ def retrieve(args):
 
     ranking_logger = RankingLogger(Run.path, qrels=None)
     milliseconds = 0
+
+    ranked_docs = [] 
 
     with ranking_logger.context('ranking.tsv', also_save_annotations=False) as rlogger:
         queries = args.queries
@@ -54,8 +59,14 @@ def retrieve(args):
 
                 ranking = [(score, pid, None) for pid, score in itertools.islice(ranking, args.depth)]
                 rlogger.log(qid, ranking, is_ranked=True)
+                
+                ranked_docs = [(x[1],x[0]) for x in ranking]
 
     print('\n\n')
     print(ranking_logger.filename)
     print("#> Done.")
     print('\n\n')
+
+    print("CLOSING FAISS_INDEX PROCESSING POOL")
+    ranker.faiss_index.parallel_pool.close()
+    return ranked_docs

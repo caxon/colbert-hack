@@ -1,0 +1,21 @@
+NOTE: Use env. colbert3
+
+$ conda activate colbert3
+
+# Indexing
+
+CUDA_VISIBLE_DEVICES="0" OMP_NUM_THREADS=1 python -m colbert.index --root ./experiments/ --doc_maxlen 180  --mask-punctuation --bsize 256 --amp --checkpoint ./data/msmarco-doc-2020oct04-colbert-200k.dnn --index_root ./indexes/ --index_name MSMARCO.10k --collection ./data/collection.10k.tsv
+
+# FAISS indexing
+
+python -m colbert.index_faiss --index_root ./indexes/ --index_name MSMARCO.small --partitions 10000 --root ./experiments/ --sample 0.3
+
+# FASISS Indexing (Testing 10k)
+
+python -m colbert.index_faiss --index_root ./indexes/ --index_name MSMARCO.10k --partitions 1000 --root ./experimens/ --sample 0.3
+
+# Retrieval
+
+python -m colbert.retrieve --nprobe 32 --partitions 2000 --faiss_depth 1024 --index_root ./indexes/ --index_name MSMARCO.10k --doc_maxlen 180 --mask-punctuation --bsize 256 --amp --checkpoint ./data/msmarco-doc-2020oct04-colbert-200k.dnn --root ./experiments/ --queries ./data/queries.dev.10.tsv
+
+

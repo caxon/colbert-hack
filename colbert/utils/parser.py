@@ -2,6 +2,9 @@ import os
 import copy
 import faiss
 
+import sys
+
+
 from argparse import ArgumentParser
 
 import colbert.utils.distributed as distributed
@@ -91,8 +94,12 @@ class Arguments():
         for check in self.checks:
             check(args)
 
-    def parse(self):
-        args = self.parser.parse_args()
+    def parse(self, inject_args=None):
+        if inject_args:
+            args = self.parser.parse_args(inject_args)
+        else:
+            args = self.parser.parse_args()
+            
         self.check_arguments(args)
 
         args.input_arguments = copy.deepcopy(args)

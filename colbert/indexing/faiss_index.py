@@ -10,6 +10,10 @@ from colbert.indexing.faiss_index_gpu import FaissIndexGPU
 from colbert.utils.utils import print_message
 
 
+
+import pdb
+
+
 class FaissIndex():
     def __init__(self, dim, partitions):
         self.dim = dim
@@ -42,9 +46,12 @@ class FaissIndex():
         print_message(f"Add data with shape {data.shape} (offset = {self.offset})..")
 
         if self.gpu.ngpu > 0 and self.offset == 0:
+            print("INITIALIZING!")
             self.gpu.adding_initialize(self.index)
 
+        
         if self.gpu.ngpu > 0:
+            print("ADDING!")
             self.gpu.add(self.index, data, self.offset)
         else:
             self.index.add(data)

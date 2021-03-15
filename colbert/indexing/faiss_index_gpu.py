@@ -12,18 +12,22 @@ import torch
 import numpy as np
 from colbert.utils.utils import print_message
 
+import pdb
 
 class FaissIndexGPU():
     def __init__(self):
+        print("INIT'D FAISS INDEX GPU")
         self.ngpu = faiss.get_num_gpus()
 
         if self.ngpu == 0:
+            print("THERE ARE NO GPUS!")
             return
 
         self.tempmem = 1 << 33
         self.max_add_per_gpu = 1 << 25
-        self.max_add = self.max_add_per_gpu * self.ngpu
-        self.add_batch_size = 65536
+        self.max_add = 1 << 25 #self.max_add_per_gpu * self.ngpu
+        # self.add_batch_size = 65536
+        self.add_batch_size = 32768
 
         self.gpu_resources = self._prepare_gpu_resources()
 
@@ -95,7 +99,7 @@ class FaissIndexGPU():
 
         self.vres, self.vdev = self._make_vres_vdev()
         self.gpu_index = faiss.index_cpu_to_gpu_multiple(self.vres, self.vdev, index, self.co)
-
+        
     def add(self, index, data, offset):
         assert self.ngpu > 0
 
@@ -106,7 +110,12 @@ class FaissIndexGPU():
             i1 = min(i0 + self.add_batch_size, nb)
             xs = data[i0:i1]
 
+            # pdb.set_trace()
+
+            print("START")
             self.gpu_index.add_with_ids(xs, np.arange(offset+i0, offset+i1))
+
+            print("STOP")
 
             if self.max_add > 0 and self.gpu_index.ntotal > self.max_add:
                 self._flush_to_cpu(index, nb, offset)

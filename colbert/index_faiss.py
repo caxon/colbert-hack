@@ -36,6 +36,7 @@ def main():
                      "partitions (for {} embeddings)".format(num_embeddings))
             print('\n\n')
 
+        print("RUNNING INDEX FAISS")
         index_faiss(args)
 
 
